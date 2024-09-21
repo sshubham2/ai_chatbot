@@ -13,8 +13,8 @@ def setup_openai_model() -> ChatOpenAI:
     model_options = list(OPENAI_MODELS.keys())
     selected_model = st.sidebar.selectbox("Choose model:", model_options, index=0)
     st.session_state.selected_model = OPENAI_MODELS[selected_model]
-
-    api_key = os.getenv('OPENAI_API_KEY') or st.text_input("Enter OpenAI API Key", type="password")
+    with st.sidebar:
+        api_key = os.getenv('OPENAI_API_KEY') or st.text_input("Enter OpenAI API Key", type="password")
     if not api_key:
         st.warning("Invalid API Key")
         st.stop()
@@ -37,8 +37,8 @@ def setup_anthropic_model() -> ChatAnthropic:
     model_options = list(ANTHROPIC_MODELS.keys())
     selected_model = st.sidebar.selectbox("Choose model:", model_options, index=0)
     st.session_state.selected_model = ANTHROPIC_MODELS[selected_model]
-
-    api_key = os.getenv('ANTHROPIC_API_KEY') or st.text_input("Enter Anthropic API Key", type="password")
+    with st.sidebar:
+        api_key = os.getenv('ANTHROPIC_API_KEY') or st.text_input("Enter Anthropic API Key", type="password")
     if not api_key:
         st.warning("Invalid API Key")
         st.stop()
@@ -63,8 +63,8 @@ def setup_groq_model() -> ChatGroq:
     model_options = list(GROQ_MODELS.keys())
     selected_model = st.sidebar.selectbox("Choose model:", model_options, index=0)
     st.session_state.selected_model = GROQ_MODELS[selected_model]
-
-    api_key = os.getenv('GROQ_API_KEY') or st.text_input("Enter Groq API Key", type="password")
+    with st.sidebar:
+        api_key = os.getenv('GROQ_API_KEY') or st.text_input("Enter Groq API Key", type="password")
     if not api_key:
         st.warning("Invalid API Key")
         st.stop()
@@ -87,8 +87,8 @@ def setup_mistral_model() -> ChatMistralAI:
     model_options = list(MISTRAL_MODELS.keys())
     selected_model = st.sidebar.selectbox("Choose model:", model_options, index=0)
     st.session_state.selected_model = MISTRAL_MODELS[selected_model]
-
-    api_key = os.getenv('MISTRAL_API_KEY') or st.text_input("Enter Mistral API Key", type="password")
+    with st.sidebar:
+        api_key = os.getenv('MISTRAL_API_KEY') or st.text_input("Enter Mistral API Key", type="password")
     if not api_key:
         st.warning("Invalid API Key")
         st.stop()
