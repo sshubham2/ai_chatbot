@@ -1,6 +1,6 @@
 import streamlit as st
 
-home_page = st.Page("rag_app_3\home.py", title="Home", icon="🏚️")
+home_page = st.Page("home.py", title="Home", icon="🏚️")
 programming_language_expert = st.Page("computer_expert.py", title="Programming Language Expert", icon="💻")
 natural_languag_expert = st.Page("language_expert.py", title="Natural Language Expert", icon="💬")
 financial_risk_expert = st.Page("finance_risk_expert.py", title="Financial Risk Expert", icon="👓")
