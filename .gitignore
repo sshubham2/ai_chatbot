@@ -4,3 +4,4 @@ tests
 poetry.lock
 rag_app_3/__pycache__
 rag_app_3/__pycache__/*
+vector_store
