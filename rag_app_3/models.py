@@ -7,6 +7,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
 from langchain_mistralai import ChatMistralAI
 from rag_app_3.config import OPENAI_MODELS, ANTHROPIC_MODELS, GROQ_MODELS, MISTRAL_MODELS
+from langchain_huggingface import HuggingFaceEmbeddings
 
 def setup_openai_model() -> ChatOpenAI:
     """Set up and return an OpenAI model."""
@@ -106,3 +107,7 @@ def setup_mistral_model() -> ChatMistralAI:
     except Exception as e:
         st.error(f"Error setting up Mistral model: {str(e)}")
         st.stop()
+        
+def setup_embedding_model():
+    model_kwargs = {'trust_remote_code': True}
+    return HuggingFaceEmbeddings(model_name="BAAI/bge-m3", model_kwargs=model_kwargs)
