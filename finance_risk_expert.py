@@ -1,4 +1,4 @@
-from rag_app_3.chat_app_fre import ChatAppFRE
+from rag_app_3.chat_app_fre import RAGChatAppFRE
 
-app = ChatAppFRE()
+app = RAGChatAppFRE()
 app.run()
