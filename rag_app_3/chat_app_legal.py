@@ -20,19 +20,19 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-class RAGChatAppFRE:
+class RAGChatAppLegal:
     def __init__(self):
         self.initialize_session_state()
         self.vStore = VectorStore()
 
     def initialize_session_state(self):
         for key, default_value in [
-            ("selected_model_fre", None),
-            ("rag_fre_store", {}),
-            ("rag_fre_messages", []),
-            ("rag_fre_config", {"configurable": {"session_id": "rag_xyz123"}}),
-            ("selected_vector_fre", None),
-            ("use_vector_db_fre", False),
+            ("selected_model_legal", None),
+            ("rag_legal_store", {}),
+            ("rag_legal_messages", []),
+            ("rag_legal_config", {"configurable": {"session_id": "rag_xyz123"}}),
+            ("selected_vector_legal", None),
+            ("use_vector_db_legal", False),
         ]:
             if key not in st.session_state:
                 st.session_state[key] = default_value
@@ -48,9 +48,9 @@ class RAGChatAppFRE:
 
     def setup_sidebar(self):
         with st.sidebar:
-            st.session_state.use_vector_db_fre = st.checkbox("Use Vector DB for Context", False)
+            st.session_state.use_vector_db_legal = st.checkbox("Use Vector DB for Context", False)
 
-            if st.session_state.use_vector_db_fre:
+            if st.session_state.use_vector_db_legal:
                 available_vector_dbs = self.vStore.get_available_vector_dbs()
                 if available_vector_dbs:
 
@@ -59,9 +59,10 @@ class RAGChatAppFRE:
                         available_vector_dbs,
                         index=0,
                     )
+
                     # Update the selected vector store if it has changed
-                    if selected_vector != st.session_state.selected_vector_fre:
-                        st.session_state.selected_vector_fre = selected_vector
+                    if selected_vector != st.session_state.selected_vector_legal:
+                        st.session_state.selected_vector_legal = selected_vector
                         self.vStore.load_vector_store(selected_vector)
                         st.session_state.current_vector_db = selected_vector  # Track current vector DB
                         st.success(f"Vector DB updated to: {selected_vector}")  # Feedback to user
@@ -69,36 +70,36 @@ class RAGChatAppFRE:
                 else:
                     st.warning('No Vector DB available. Please create a new one.')
             else:
-                st.session_state.selected_vector_fre = None
+                st.session_state.selected_vector_legal = None
                 st.session_state.current_vector_db = None
 
         # Retrieve the current retriever based on user choice
-        retriever = self.vStore.get_retriever() if st.session_state.use_vector_db_fre else None
+        retriever = self.vStore.get_retriever() if st.session_state.use_vector_db_legal else None
 
         st.sidebar.header("Available LLM Model")
         selected_provider = st.sidebar.selectbox(
             "Choose Company:",
             [provider.value for provider in ModelProvider],
             index=0,
-            key='llm_provider_fre'
+            key='llm_provider_legal'
         )
 
         return self.setup_llm(selected_provider), retriever
 
     def clear_chat(self):
-        if st.sidebar.button('Clear Chat', key='clear_chat_fre'):
-            st.session_state.rag_fre_messages = []
-            st.session_state.rag_fre_store = {}
+        if st.sidebar.button('Clear Chat', key='clear_chat_legal'):
+            st.session_state.rag_legal_messages = []
+            st.session_state.rag_legal_store = {}
             st.rerun()
 
     @staticmethod
     def get_session_history(session_id: str):
-        if session_id not in st.session_state.rag_fre_store:
-            st.session_state.rag_fre_store[session_id] = ChatMessageHistory()
-        return st.session_state.rag_fre_store[session_id]
+        if session_id not in st.session_state.rag_legal_store:
+            st.session_state.rag_legal_store[session_id] = ChatMessageHistory()
+        return st.session_state.rag_legal_store[session_id]
 
     def setup_chain(self, llm, retriever):
-        if st.session_state.use_vector_db_fre and retriever:
+        if st.session_state.use_vector_db_legal and retriever:
             # Use the existing RAG chain setup
             contextualize_q_prompt = ChatPromptTemplate.from_messages([
                 ("system", csp.contextualize_q_system_prompt),
@@ -108,7 +109,7 @@ class RAGChatAppFRE:
             history_aware_retriever = create_history_aware_retriever(llm, retriever, contextualize_q_prompt)
 
             qa_prompt = ChatPromptTemplate.from_messages([
-                ("system", csp.financial_risk_expert_system_prompt_rag),
+                ("system", csp.legal_expert_system_prompt_rag),
                 MessagesPlaceholder("chat_history"),
                 ("human", "{input}"),
             ])
@@ -126,7 +127,7 @@ class RAGChatAppFRE:
         else:
             # Use a simple chain without RAG
             qa_prompt = ChatPromptTemplate.from_messages([
-            ("system", csp.financial_risk_expert_system_prompt),
+            ("system", csp.legal_expert_system_prompt),
             MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}"),
             ])
@@ -140,36 +141,36 @@ class RAGChatAppFRE:
             )
 
     def display_chat_messages(self):
-        for message in st.session_state.rag_fre_messages:
+        for message in st.session_state.rag_legal_messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
     def handle_user_input(self, conversational_chain):
-        if prompt := st.chat_input("Hi! How can I help you?", key='chat_input_fre'):
-            st.session_state.rag_fre_messages.append({"role": "user", "content": prompt})
+        if prompt := st.chat_input("Hi! How can I help you?", key='chat_input_legal'):
+            st.session_state.rag_legal_messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
             with st.chat_message("assistant"):
                 try:
-                    if st.session_state.use_vector_db_fre : 
+                    if st.session_state.use_vector_db_legal : 
                         with st.spinner("Thinking🤔"):
-                            response = conversational_chain.invoke({"input": prompt}, config=st.session_state.rag_fre_config)
+                            response = conversational_chain.invoke({"input": prompt}, config=st.session_state.rag_legal_config)
                             context_list = list(set(context.metadata['source'] for context in response['context']))
                             answer = f"{response['answer']}\n\n📌 Source: {', '.join(context_list)}"
                             response = st.write(answer)
                     else:
                         # When not using vector DB, response is an AIMessage
-                        stream = conversational_chain.stream({"input": prompt}, config=st.session_state.rag_fre_config)
+                        stream = conversational_chain.stream({"input": prompt}, config=st.session_state.rag_legal_config)
                         response = st.write_stream(stream)
                 except Exception as e:
                     st.info(f"An error occurred: {str(e)}. Please check your API key or try again.")
                     st.stop()
-            st.session_state.rag_fre_messages.append({"role": "assistant", "content": answer if st.session_state.use_vector_db_fre else response})
+            st.session_state.rag_legal_messages.append({"role": "assistant", "content": answer if st.session_state.use_vector_db_legal else response})
 
 
     def run(self):
-        st.markdown(" #### Financial Risk Expert 👓 ")
+        st.markdown(" #### Legal Expert 🏛️ ")
         llm, retriever = self.setup_sidebar()
         conversational_chain = self.setup_chain(llm, retriever)
         self.clear_chat()

@@ -107,7 +107,8 @@ def setup_mistral_model() -> ChatMistralAI:
     except Exception as e:
         st.error(f"Error setting up Mistral model: {str(e)}")
         st.stop()
-        
+
+@st.cache_resource      
 def setup_embedding_model():
     model_kwargs = {'trust_remote_code': True}
     return HuggingFaceEmbeddings(model_name="BAAI/bge-m3", model_kwargs=model_kwargs)

@@ -21,7 +21,8 @@ ANTHROPIC_MODELS = {
 
 GROQ_MODELS = {
     'Llama 3.1 70B (Preview)': 'llama-3.1-70b-versatile',
-    "Llama 3.1 8B (Preview)": "llama-3.1-8b-instant"
+    "Llama 3.1 8B (Preview)": "llama-3.1-8b-instant",
+    "Llama 3.2 90B (Preview)":"llama-3.2-90b-text-preview"
 }
 
 MISTRAL_MODELS = {

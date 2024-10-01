@@ -12,29 +12,27 @@ from rag_app_3.config import ModelProvider
 from rag_app_3.models import setup_openai_model, setup_anthropic_model, setup_groq_model, setup_mistral_model, setup_embedding_model
 from rag_app_3.prompts import ChatSystemPrompts as csp
 from rag_app_3.vector_store import VectorStore
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
 class RAGChatAppCE:
     def __init__(self):
         self.initialize_session_state()
-        self.use_vector_db = VectorStore.use_vector_db()  # Call the static method
-        if self.use_vector_db:
-            self.vStore = VectorStore()
-            self.embedding_model = setup_embedding_model()
-        else:
-            self.vStore = None
-            self.embedding_model = None
+        self.vStore = VectorStore()
 
     def initialize_session_state(self):
         for key, default_value in [
-            ("selected_model", None),
+            ("selected_model_ce", None),
             ("rag_ce_store", {}),
             ("rag_ce_messages", []),
-            ("rag_ce_config", {"configurable": {"session_id": "rag_abc123"}}),
-            ("use_local_files", False),
-            ("selected_folder", None),
-            ("create_new_db", False)
+            ("rag_ce_config", {"configurable": {"session_id": "rag_xyz123"}}),
+            ("selected_vector_ce", None),
+            ("use_vector_db_ce", False),
         ]:
             if key not in st.session_state:
                 st.session_state[key] = default_value
@@ -50,25 +48,30 @@ class RAGChatAppCE:
 
     def setup_sidebar(self):
         with st.sidebar:
-            if self.use_vector_db:
-                if st.button('Create New Vector DB'):
-                    st.session_state.create_new_db = True
-                    st.rerun()
-
-                if st.session_state.create_new_db:
-                    self.vStore.create_new_db(self.embedding_model)
-                    st.session_state.create_new_db = False
+            st.session_state.use_vector_db_ce = st.checkbox("Use Vector DB for Context", False)
+            if st.session_state.use_vector_db_ce:
+                available_vector_dbs = self.vStore.get_available_vector_dbs()
+                if available_vector_dbs:
+                    selected_vector = st.selectbox(
+                        'Choose Vector DB:',
+                        available_vector_dbs,
+                        index=0,
+                    )
+                    # Update the selected vector store if it has changed
+                    if selected_vector != st.session_state.selected_vector_ce:
+                        st.session_state.selected_vector_ce = selected_vector
+                        self.vStore.load_vector_store(selected_vector)
+                        st.session_state.current_vector_db = selected_vector  # Track current vector DB
+                        st.success(f"Vector DB updated to: {selected_vector}")  # Feedback to user
+                        st.rerun()  # Rerun the script to reflect changes
                 else:
-                    self.vStore.load_index(self.embedding_model)
-                
-                col1, col2 = st.columns(2)
-                if col1.button('Sync VectorDB', key='sync_vectordb_ce'):
-                    self.vStore.reset_index()
-                    self.vStore._create_index(self.embedding_model)
-                if col2.button('Reset VectorDB', key='reset_vectordb_ce'):
-                    self.vStore.reset_index()
+                    st.warning('No Vector DB available. Please create a new one.')
+            else:
+                st.session_state.selected_vector_ce = None
+                st.session_state.current_vector_db = None
 
-        retriever = self.vStore.get_retriever() if self.use_vector_db else None
+        # Retrieve the current retriever based on user choice
+        retriever = self.vStore.get_retriever() if st.session_state.use_vector_db_ce else None
 
         st.sidebar.header("Available LLM Model")
         selected_provider = st.sidebar.selectbox(
@@ -93,7 +96,7 @@ class RAGChatAppCE:
         return st.session_state.rag_ce_store[session_id]
 
     def setup_chain(self, llm, retriever):
-        if self.use_vector_db and retriever:
+        if st.session_state.use_vector_db_ce and retriever:
             # Use the existing RAG chain setup
             contextualize_q_prompt = ChatPromptTemplate.from_messages([
                 ("system", csp.contextualize_q_system_prompt),
@@ -121,19 +124,17 @@ class RAGChatAppCE:
         else:
             # Use a simple chain without RAG
             qa_prompt = ChatPromptTemplate.from_messages([
-                ("system", csp.computer_engineer_expert_system_prompt),
-                MessagesPlaceholder("chat_history"),
-                ("human", "{input}"),
+            ("system", csp.computer_engineer_expert_system_prompt),
+            MessagesPlaceholder(variable_name="chat_history"),
+            ("human", "{input}"),
             ])
 
-            chain = qa_prompt | llm
-
-            return RunnableWithMessageHistory(
-                chain,
-                self.get_session_history,
-                input_messages_key="input",
-                history_messages_key="chat_history",
-                output_messages_key="answer",
+        chain = qa_prompt | llm
+        return RunnableWithMessageHistory(
+            chain,
+            self.get_session_history,
+            input_messages_key="input",
+            history_messages_key="chat_history",
             )
 
     def display_chat_messages(self):
@@ -149,7 +150,7 @@ class RAGChatAppCE:
 
             with st.chat_message("assistant"):
                 try:
-                    if self.use_vector_db and self.vStore.vector_store:
+                    if st.session_state.use_vector_db_ce : 
                         with st.spinner("Thinking🤔"):
                             response = conversational_chain.invoke({"input": prompt}, config=st.session_state.rag_ce_config)
                             context_list = list(set(context.metadata['source'] for context in response['context']))
@@ -162,10 +163,8 @@ class RAGChatAppCE:
                 except Exception as e:
                     st.info(f"An error occurred: {str(e)}. Please check your API key or try again.")
                     st.stop()
-            if self.use_vector_db and self.vStore.vector_store:
-                st.session_state.rag_ce_messages.append({"role": "assistant", "content": answer})
-            else:
-                st.session_state.rag_ce_messages.append({"role": "assistant", "content": response})
+            st.session_state.rag_ce_messages.append({"role": "assistant", "content": answer if st.session_state.use_vector_db_ce else response})
+
 
     def run(self):
         st.markdown(" #### Programming Language Expert 💻 ")

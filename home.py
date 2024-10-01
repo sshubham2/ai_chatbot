@@ -135,6 +135,58 @@ with st.expander("What can I do?"):
 
         If you have a specific task in mind or need assistance with something else, feel free to let me know!
 """)
+    
+st.subheader("Financial Risk Expert 👓")
+with st.expander("What can I do?"):
+    st.markdown("""
+        I can help you understand various concepts related to financial risk and investments. Here’s a quick overview of what I can do:
+        
+            1. Explain Financial Concepts:
+                I can break down complex financial terms and concepts into simple, easy-to-understand language. For example,
+                if you want to know about "diversification," I can explain how spreading your investments across different assets can reduce risk.
+                
+            2. Risk Assessment:
+                I can help you understand different types of financial risks, such as market risk, credit risk, operational risk,
+                and liquidity risk, and how they might affect your investments.
+                
+            3. Investment Strategies:
+                If you're curious about how to build a portfolio or what investment strategies might work best for you based on your risk tolerance,
+                I can provide guidance and examples.
+                
+            4. Analyzing Market Trends:
+                I can discuss how to interpret market trends and economic indicators to make informed investment decisions.
+                
+            5. Answer Questions:
+                Whether you have specific questions about financial products, market conditions, or investment strategies,
+                I'm here to provide detailed answers.
+                
+            6. Educate on Risk Management:
+                I can teach you about risk management techniques, such as how to set stop-loss orders or the importance of having an emergency fund.
+
+        If you have a specific question or topic in mind, feel free to ask!
+""")
+    
+st.subheader("Legal Expert 🏛️")
+with st.expander("What can I do?"):
+    st.markdown("""
+        I can provide information and guidance on various legal topics, including but not limited to:
+
+            1. Understanding Legal Concepts:
+                Explain legal terminology and concepts in simple language.
+            
+            2. Relevant Laws and Regulations:
+                Cite applicable laws, statutes, or regulations that may relate to your inquiry.
+                
+            3. General Guidance:
+                Offer suggestions on potential steps you might consider in a legal situation.
+                
+            4. Clarification of Legal Processes:
+            Describe how certain legal processes work, such as litigation, contracts, or dispute resolution.
+            
+        However, I cannot provide definitive legal advice, make decisions on your behalf, or represent you in any legal matter.
+        If you have a specific question or topic in mind, feel free to ask!
+""")     
+
 st.write('Use the sidebar to navigate between modules and start exploring!')
 
 # Title of the Streamlit application
